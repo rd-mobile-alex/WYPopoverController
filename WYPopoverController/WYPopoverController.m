@@ -1548,6 +1548,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
     BOOL                     animated;
     BOOL                     isListeningNotifications;
     BOOL                     isInterfaceOrientationChanging;
+    BOOL                     isObserverAdded;
     __weak UIBarButtonItem  *barButtonItem;
     CGRect                   keyboardRect;
     
@@ -1953,6 +1954,9 @@ static WYPopoverTheme *defaultTheme_ = nil;
                 [strongSelf->viewController viewDidAppear:YES];
             }
             
+            if (isObserverAdded == NO)
+                isObserverAdded = YES;
+
             if ([strongSelf->viewController respondsToSelector:@selector(preferredContentSize)])
             {
                 [strongSelf->viewController addObserver:self forKeyPath:NSStringFromSelector(@selector(preferredContentSize)) options:0 context:nil];
@@ -2653,6 +2657,10 @@ static WYPopoverTheme *defaultTheme_ = nil;
     }
     
     @try {
+        
+        if (isObserverAdded == YES)
+            isObserverAdded = NO;
+
         if ([viewController respondsToSelector:@selector(preferredContentSize)]) {
             [viewController removeObserver:self forKeyPath:NSStringFromSelector(@selector(preferredContentSize))];
         } else {
@@ -3157,14 +3165,33 @@ static CGPoint WYPointRelativeToOrientation(CGPoint origin, CGSize size, UIInter
     [overlayView removeFromSuperview];
     [overlayView setDelegate:nil];
     
+    // To prevent crash: "deallocated while key value observers were still registered with viewController"
+    
+    @try {
+        if (isObserverAdded == YES) {
+            isObserverAdded = NO;
+            
+            if ([viewController respondsToSelector:@selector(preferredContentSize)]) {
+                [viewController removeObserver:self forKeyPath:NSStringFromSelector(@selector(preferredContentSize))];
+            } else {
+                [viewController removeObserver:self forKeyPath:NSStringFromSelector(@selector(contentSizeForViewInPopover))];
+            }
+        }
+    }
+    @catch (NSException *exception) {
+    }
+    @finally {
+        viewController = nil;
+    }
+    
+    [self unregisterTheme];
+    
     barButtonItem = nil;
     passthroughViews = nil;
-    viewController = nil;
     inView = nil;
     overlayView = nil;
     backgroundView = nil;
     
-    [self unregisterTheme];
     theme = nil;
 }
 
