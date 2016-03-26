@@ -852,17 +852,17 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
 
 - (BOOL)isPassthroughView:(UIView *)view
 {
-	if (view == nil)
+    if (view == nil)
     {
-		return NO;
-	}
-	
-	if ([self.passthroughViews containsObject:view])
+        return NO;
+    }
+    
+    if ([self.passthroughViews containsObject:view])
     {
-		return YES;
-	}
-	
-	return [self isPassthroughView:view.superview];
+        return YES;
+    }
+    
+    return [self isPassthroughView:view.superview];
 }
 
 #pragma mark - UIAccessibility
@@ -989,24 +989,24 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
 }
 
 /*
-- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
-{
-    BOOL result = [super pointInside:point withEvent:event];
-    
-    if (self.isAppearing == NO)
-    {
-        BOOL isTouched = [self isTouchedAtPoint:point];
-        
-        if (isTouched == NO && UIAccessibilityIsVoiceOverRunning())
-        {
-            UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
-            UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, NSLocalizedString(@"Double-tap to dismiss pop-up window.", nil));
-        }
-    }
-    
-    return result;
-}
-*/
+ - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
+ {
+ BOOL result = [super pointInside:point withEvent:event];
+ 
+ if (self.isAppearing == NO)
+ {
+ BOOL isTouched = [self isTouchedAtPoint:point];
+ 
+ if (isTouched == NO && UIAccessibilityIsVoiceOverRunning())
+ {
+ UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+ UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, NSLocalizedString(@"Double-tap to dismiss pop-up window.", nil));
+ }
+ }
+ 
+ return result;
+ }
+ */
 
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -1718,8 +1718,8 @@ static WYPopoverTheme *defaultTheme_ = nil;
     
     NSArray *keypaths = [theme observableKeypaths];
     for (NSString *keypath in keypaths) {
-		[theme addObserver:self forKeyPath:keypath options:NSKeyValueObservingOptionNew context:NULL];
-	}
+        [theme addObserver:self forKeyPath:keypath options:NSKeyValueObservingOptionNew context:NULL];
+    }
 }
 
 - (void)unregisterTheme
@@ -1954,16 +1954,17 @@ static WYPopoverTheme *defaultTheme_ = nil;
                 [strongSelf->viewController viewDidAppear:YES];
             }
             
-            if (isObserverAdded == NO)
+            if (isObserverAdded == NO) {
                 isObserverAdded = YES;
-
-            if ([strongSelf->viewController respondsToSelector:@selector(preferredContentSize)])
-            {
-                [strongSelf->viewController addObserver:self forKeyPath:NSStringFromSelector(@selector(preferredContentSize)) options:0 context:nil];
-            }
-            else
-            {
-                [strongSelf->viewController addObserver:self forKeyPath:NSStringFromSelector(@selector(contentSizeForViewInPopover)) options:0 context:nil];
+                
+                if ([strongSelf->viewController respondsToSelector:@selector(preferredContentSize)])
+                {
+                    [strongSelf->viewController addObserver:self forKeyPath:NSStringFromSelector(@selector(preferredContentSize)) options:0 context:nil];
+                }
+                else
+                {
+                    [strongSelf->viewController addObserver:self forKeyPath:NSStringFromSelector(@selector(contentSizeForViewInPopover)) options:0 context:nil];
+                }
             }
             
             strongSelf->backgroundView.appearing = NO;
@@ -2658,13 +2659,14 @@ static WYPopoverTheme *defaultTheme_ = nil;
     
     @try {
         
-        if (isObserverAdded == YES)
+        if (isObserverAdded == YES) {
             isObserverAdded = NO;
 
-        if ([viewController respondsToSelector:@selector(preferredContentSize)]) {
-            [viewController removeObserver:self forKeyPath:NSStringFromSelector(@selector(preferredContentSize))];
-        } else {
-            [viewController removeObserver:self forKeyPath:NSStringFromSelector(@selector(contentSizeForViewInPopover))];
+            if ([viewController respondsToSelector:@selector(preferredContentSize)]) {
+                [viewController removeObserver:self forKeyPath:NSStringFromSelector(@selector(preferredContentSize))];
+            } else {
+                [viewController removeObserver:self forKeyPath:NSStringFromSelector(@selector(contentSizeForViewInPopover))];
+            }
         }
     }
     @catch (NSException * __unused exception) {}
@@ -2727,17 +2729,17 @@ static WYPopoverTheme *defaultTheme_ = nil;
     
     //if (!isTouched)
     //{
-        BOOL shouldDismiss = !viewController.modalInPopover;
-        
-        if (shouldDismiss && delegate && [delegate respondsToSelector:@selector(popoverControllerShouldDismissPopover:)])
-        {
-            shouldDismiss = [delegate popoverControllerShouldDismissPopover:self];
-        }
-        
-        if (shouldDismiss)
-        {
-            [self dismissPopoverAnimated:animated options:options completion:nil callDelegate:YES];
-        }
+    BOOL shouldDismiss = !viewController.modalInPopover;
+    
+    if (shouldDismiss && delegate && [delegate respondsToSelector:@selector(popoverControllerShouldDismissPopover:)])
+    {
+        shouldDismiss = [delegate popoverControllerShouldDismissPopover:self];
+    }
+    
+    if (shouldDismiss)
+    {
+        [self dismissPopoverAnimated:animated options:options completion:nil callDelegate:YES];
+    }
     //}
 }
 
