@@ -865,12 +865,6 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
     return [self isPassthroughView:view.superview];
 }
 
-#pragma mark - UIAccessibility
-
-- (void)accessibilityElementDidBecomeFocused {
-    self.accessibilityLabel = NSLocalizedString(@"Double-tap to dismiss pop-up window.", nil);
-}
-
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -987,27 +981,6 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
     
     return self;
 }
-
-/*
- - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
- {
- BOOL result = [super pointInside:point withEvent:event];
- 
- if (self.isAppearing == NO)
- {
- BOOL isTouched = [self isTouchedAtPoint:point];
- 
- if (isTouched == NO && UIAccessibilityIsVoiceOverRunning())
- {
- UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
- UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, NSLocalizedString(@"Double-tap to dismiss pop-up window.", nil));
- }
- }
- 
- return result;
- }
- */
-
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -1680,7 +1653,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
         theme.innerCornerRadius = appearance.innerCornerRadius;
         theme.viewContentInsets = appearance.viewContentInsets;
         theme.overlayColor = appearance.overlayColor;
-
+        
         themeIsUpdating = NO;
         themeUpdatesEnabled = YES;
         
@@ -1828,7 +1801,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
         
         UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
         
-        result = CGSizeMake(320, UIDeviceOrientationIsLandscape(orientation) ? windowSize.width : windowSize.height);
+        result = CGSizeMake(320, UIInterfaceOrientationIsLandscape(orientation) ? windowSize.width : windowSize.height);
     }
     
     return result;
@@ -1922,15 +1895,11 @@ static WYPopoverTheme *defaultTheme_ = nil;
     {
         overlayView = [[WYPopoverOverlayView alloc] initWithFrame:inView.window.bounds];
         overlayView.autoresizesSubviews = NO;
-        overlayView.isAccessibilityElement = YES;
-        overlayView.accessibilityTraits = UIAccessibilityTraitNone;
         overlayView.delegate = self;
         overlayView.passthroughViews = passthroughViews;
         
         backgroundView = [[WYPopoverBackgroundView alloc] initWithContentSize:contentViewSize];
         backgroundView.appearing = YES;
-        backgroundView.isAccessibilityElement = YES;
-        backgroundView.accessibilityTraits = UIAccessibilityTraitNone;
         
         backgroundView.delegate = self;
         backgroundView.hidden = YES;
@@ -2150,19 +2119,15 @@ static WYPopoverTheme *defaultTheme_ = nil;
     CGAffineTransform transform = backgroundView.transform;
     
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-
+    
     CGSize containerViewSize = backgroundView.frame.size;
     
     if (backgroundView.arrowHeight > 0)
     {
-        if (UIDeviceOrientationIsLandscape(orientation)) {
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
             containerViewSize.width = backgroundView.frame.size.height;
             containerViewSize.height = backgroundView.frame.size.width;
         }
-        
-        //WY_LOG(@"containerView.arrowOffset = %f", containerView.arrowOffset);
-        //WY_LOG(@"containerViewSize = %@", NSStringFromCGSize(containerViewSize));
-        //WY_LOG(@"orientation = %@", WYStringFromOrientation(orientation));
         
         if (arrowDirection == WYPopoverArrowDirectionDown)
         {
@@ -2531,7 +2496,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
     containerFrame = backgroundView.frame;
     
     containerFrame.origin = WYPointRelativeToOrientation(containerOrigin, containerFrame.size, orientation);
-
+    
     if (aAnimated == YES) {
         backgroundView.frame = savedContainerFrame;
         __weak __typeof__(self) weakSelf = self;
@@ -2542,8 +2507,6 @@ static WYPopoverTheme *defaultTheme_ = nil;
     } else {
         backgroundView.frame = containerFrame;
     }
-    
-    WY_LOG(@"popoverContainerView.frame = %@", NSStringFromCGRect(backgroundView.frame));
 }
 
 - (void)dismissPopoverAnimated:(BOOL)aAnimated
@@ -2661,7 +2624,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
         
         if (isObserverAdded == YES) {
             isObserverAdded = NO;
-
+            
             if ([viewController respondsToSelector:@selector(preferredContentSize)]) {
                 [viewController removeObserver:self forKeyPath:NSStringFromSelector(@selector(preferredContentSize))];
             } else {
@@ -3124,10 +3087,6 @@ static CGPoint WYPointRelativeToOrientation(CGPoint origin, CGSize size, UIInter
 {
     NSDictionary *info = [notification userInfo];
     keyboardRect = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    
-    //UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-    //WY_LOG(@"orientation = %@", WYStringFromOrientation(orientation));
-    //WY_LOG(@"keyboardRect = %@", NSStringFromCGRect(keyboardRect));
     
     BOOL shouldIgnore = NO;
     
